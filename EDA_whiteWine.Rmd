@@ -2,7 +2,9 @@
 title: "EDA of White Wine Quality Data"
 author: "Sohan Aryal"
 date: "7/15/2022"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -188,15 +190,107 @@ From above plot, we have seen that most outliers are on higher end of values, so
 
 ```{r}
 
+df <- wine
+
+limit <- rep(0,11)
+
+for (i in 1:11){
+  q3 <- quantile(df[,i], 0.75)
+  iqr <- IQR(df[,i], 0.75)
+  
+  limit[i] <- q3 + 1.5*iqr
+}
+
+df_index <- matrix(0, 4898,11)
+
+
+
+for (i in 1:4898)
+  for (j in 1:11)
+    if (df[i,j] > limit[j])
+      df_index[i,j] <- 1
+
+
+dfIndex <- base::apply(df_index, 1, sum)
+
+
+df2 <- df[dfIndex == 0, ]
+
+indexes = sample(1:nrow(df2), size=0.7*nrow(df2))
+train <- df2[indexes,]
+test <- df2[-indexes,]
 ```
 
 
+Above procedure reduces the data size from 4899 to 4074. Data is randomly divided into Training data and Test Data in ratio of 7:3.
+
+
+#### Regression Model
+
+Now we run linear regression to find out which variables are significant. We go on improving our model by omitting insignificant ones by checking improvement in R-square value.
+
+Now we will create the model to predict quality of wines. We use the train data set.
+
+```{r}
+model1 <- lm(quality ~ ., data = train)
+summary(model1)
+```
+
+Citric acid and Total sulfur dioxide are not significant in this model with adjusted R-square of 0.2407.
+Now we create model without these variables.
+
+```{r}
+model2 <- lm(quality ~ . -citric.acid -total.sulfur.dioxide, data = train)
+summary(model2)
+```
+
+It didn't quite improve the model. But all the variables are significant now.
+We can see that predictors are continuous while quality is integer. Prediction made will not be integer, so it is difficult to explain the variation in quality using linear model. We can check the prediction by our model2.
+
+```{r}
+predictTest <- predict.lm(model2, newdata = test)
+summary(predictTest)
+```
+
+The model2 didn't predict quality over 7.165. So now we will use different method for prediction.
+
+
+# Logistic Regression
+
+We will make a logistics regression model to predict the quality of wine using input variables.
+First we will create a subset of wines rated 8 or above effectively making quality having two factors.
+Quality rating > 7 : wine is "Good"
+Quality rating <=7 : wine is "Not good"
+
+```{r}
+
+train$rating <- ifelse (as.integer(train$quality) > 7, 1, 0)
+
+test$rating <- ifelse (as.integer(test$quality) > 7, 1, 0)
+
+model3 = glm(rating ~.-quality ,data=train,family = "binomial")
+summary(model3)
+```
+
+Significant variables are: fixed.acidity, residual.sugar and pH.
+We will use this model to predict over testing set.
+
+```{r}
+prediction = predict(model3, newdata=test, type="response")
+table(test$rating, prediction > 0.5)
+```
+
+Our model predicts that no wine is in the best rated wine group, but actually 54 of the wines are rated 8 or 9 in the test set. Our prediction is same as the baseline prediction. So, there is not much benefit from this model. Let's check what is the maximum value of prediction over test set.
+
+```{r}
+print("The maximum value of prediction over testing set is ")
+round(max(prediction),3)
+```
+
+As the maximum value is less than 0.5, our model will always predict that wine quality will be less than 8.
 
 
 
+### Conclusion
 
-
-
-
-
-
+We used linear regression model and logistic regression model. Though we see some association from correlation plot and significant variables on these two models, it seems like wine quality is not well supported by its chemical properties. At each quality level variability of the predictors is high.
