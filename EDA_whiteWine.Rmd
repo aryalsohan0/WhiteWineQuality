@@ -3,8 +3,8 @@ title: "EDA of White Wine Quality Data"
 author: "Sohan Aryal"
 date: "7/15/2022"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
