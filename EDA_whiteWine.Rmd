@@ -1,0 +1,202 @@
+---
+title: "EDA of White Wine Quality Data"
+author: "Sohan Aryal"
+date: "7/15/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+#### Loading Libraries
+```{r, results = "hide"}
+library(ggplot2)
+library(dplyr)
+library(gridExtra)
+library(psych)
+library(corrplot)
+
+```
+
+#### Loading Data
+```{r}
+wine <- read.csv2("winequality-white.csv")
+glimpse(wine)
+```
+
+Since all variable except quality are as character we need to convert them from character into numerical.
+
+```{r}
+wine <- data.frame(lapply(wine, function(x) as.numeric(as.character(x))))
+
+```
+
+Let's see the summary of each variable in dataset.
+
+```{r}
+summary(wine)
+```
+
+#### Wine Quality Distribution
+Our main variable of interest in this dataset is wine quality. Let's look at the summary of wine quality in the following table and histogram.
+
+```{r, warning=FALSE}
+print("Number of wines with particular rating:")
+table(wine$quality)
+
+ggplot(aes(x = quality), data = wine) + 
+  geom_histogram(stat = "count") +
+  xlab("Quality of White Wines") +
+  ylab("Number of White Wines")
+```
+
+Quality of white wine has near-normal distribution as seen from the plot. Most of the wines are rated 5 to 7, while the very few are rated [3,4] and [8,9]. There is no wine with rating 1, 2 and 10.
+
+
+#### Univariate Analysis
+
+```{r Univariate Plots, fig.height = 8, fig.width = 13, message=FALSE}
+p1 <- ggplot(aes(x=fixed.acidity),data = wine) +
+  geom_histogram(color = "black", fill = "gray") +
+  labs(x = 'Fixed acidity', y = NULL)
+
+p12 <- ggplot(aes(x=fixed.acidity),data = wine) +
+  geom_boxplot(color = "black", fill = "gray") +
+  labs(x = 'Fixed acidity', y = NULL)
+
+p2 <- ggplot(aes(x=volatile.acidity),data = wine) +
+  geom_histogram(color = "black", fill = "gray") +
+  labs(x = 'Volatile acidity', y = NULL)
+
+p22 <- ggplot(aes(x=volatile.acidity),data = wine) +
+  geom_boxplot(color = "black", fill = "gray") +
+  labs(x = 'Volatile acidity', y = NULL)
+
+p3 <- ggplot(aes(x=citric.acid),data = wine) +
+  geom_histogram(color = "black", fill = "gray") +
+  labs(x = 'Citric acid', y = NULL)
+
+p32 <- ggplot(aes(x=citric.acid),data = wine) +
+  geom_boxplot(color = "black", fill = "gray") +
+  labs(x = 'Citric acid', y = NULL)
+
+p4 <- ggplot(aes(x=residual.sugar),data = wine) +
+  geom_histogram(color = "black", fill = "gray") +
+  labs(x = 'Residual sugar', y = NULL)
+
+p42 <- ggplot(aes(x=residual.sugar),data = wine) +
+  geom_boxplot(color = "black", fill = "gray") +
+  labs(x = 'Residual sugar', y = NULL)
+
+p5 <- ggplot(aes(x=chlorides),data = wine) +
+  geom_histogram(color = "black", fill = "gray") +
+  labs(x = 'Chlorides', y = NULL)
+
+p52 <- ggplot(aes(x=chlorides),data = wine) +
+  geom_boxplot(color = "black", fill = "gray") +
+  labs(x = 'Chlorides', y = NULL)
+
+p6 <- ggplot(aes(x=free.sulfur.dioxide),data = wine) +
+  geom_histogram(color = "black", fill = "gray") +
+  labs(x = 'Free sulfur dioxide', y = NULL)
+
+p62 <- ggplot(aes(x=free.sulfur.dioxide),data = wine) +
+  geom_boxplot(color = "black", fill = "gray") +
+  labs(x = 'Free sulfur dioxide', y = NULL)
+
+p7 <- ggplot(aes(x=total.sulfur.dioxide),data = wine) +
+  geom_histogram(color = "black", fill = "gray") +
+  labs(x = 'Total sulfur dioxide', y = NULL)
+
+p72 <- ggplot(aes(x=total.sulfur.dioxide),data = wine) +
+  geom_boxplot(color = "black", fill = "gray") +
+  labs(x = 'Total sulfur dioxide', y = NULL)
+
+p8 <- ggplot(aes(x=density),data = wine) +
+  geom_histogram(color = "black", fill = "gray") +
+  labs(x = 'Density', y = NULL)
+
+p82 <- ggplot(aes(x=density),data = wine) +
+  geom_boxplot(color = "black", fill = "gray") +
+  labs(x = 'Density', y = NULL)
+
+p9 <- ggplot(aes(x=pH),data = wine) +
+  geom_histogram(color = "black", fill = "gray") +
+  labs(x = 'pH levels', y = NULL)
+
+p92 <- ggplot(aes(x=pH),data = wine) +
+  geom_boxplot(color = "black", fill = "gray") +
+  labs(x = 'pH levels', y = NULL)
+
+p10 <- ggplot(aes(x=sulphates),data = wine) +
+  geom_histogram(color = "black", fill = "gray") +
+  labs(x = 'Sulphates', y = NULL)
+
+p102 <- ggplot(aes(x=sulphates),data = wine) +
+  geom_boxplot(color = "black", fill = "gray") +
+  labs(x = 'Sulphates', y = NULL)
+
+p11 <- ggplot(aes(x=alcohol),data = wine) +
+  geom_histogram(color = "black", fill = "gray") +
+  labs(x = 'Alcohol', y = NULL)
+
+p112 <- ggplot(aes(x=alcohol),data = wine) +
+  geom_boxplot(color = "black", fill = "gray") +
+  labs(x = 'Alcohol', y = NULL)
+
+grid.arrange(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, ncol = 3, top = "Univariate Plots (Histogram)")
+
+grid.arrange(p12, p22, p32, p42, p52, p62, p72, p82, p92, p102, p112, ncol = 2, top ="Box-Plot")
+```
+
+
+Variables like fixed acidity, volatile acidity and citric acid have outliers; which when removed their distribution looks symmetric. Some variables like residual sugar doesn't become symmetric even when their outliers are removed. Mostly outliers of these variables are on the larger values. Alcohol doesn't have outliers but have some irregular type of distribution.
+
+
+#### Bivariate Plots
+
+Let's do the correlation plot to see how associated variables are.
+
+```{r Bivariate_Plots, fig.height=10, fig.width=10}
+
+wq.corr <- cor(wine)
+corrplot(wq.corr, method='color', type = 'upper', 
+         tl.col = "black", addCoef.col='blue')
+```
+
+From correlation matrix, we see how quality of wine is related with other chemical properties of wine.
+* Quality and alcohol have moderate correlation (0.44), it is highest amongst all other chemical properties.
+* Quality and density has lower negative correlation (-0.31).
+* Quality has very low negative correlation with total sulfur dioxide, chlorides and volatile acidity.
+* Quality has very weak negative correlation with residual sugar(-0.1), citric acid(-0.01) and fixed acidity(-0.11).
+* Quality has very weak positive correlation with pH(0.1), sulphates(0.05) and free sulphur dioxide(0.01).
+
+
+* Alcohol has strong negative correlation (-0.78) with the density of wine.
+* Density is strongly correlated (0.84) with residual sugar quantity.
+* Alcohol has moderate negative correlations with Residual sugar(-0.45), Total SO2 (-0.45) and Chlorides (-0.36).
+
+
+Overall it was seen that main taste qualities of wine, such as acidity and sweetness have a low effect on quality. The highest positive correlation of quality rating appears to be with alcohol. Density is a variable which seems to be affected by other variables the most. In fact strongest relationship in the given sample is with Density and Alcohol.
+
+
+#### Data Preparation
+
+From above plot, we have seen that most outliers are on higher end of values, so we consider those observation as outlier which are above $$Q_3 + 1.5 * IQR$$.
+
+```{r}
+
+```
+
+
+
+
+
+
+
+
+
+
+
