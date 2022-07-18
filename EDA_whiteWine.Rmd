@@ -280,7 +280,7 @@ prediction = predict(model3, newdata=test, type="response")
 table(test$rating, prediction > 0.5)
 ```
 
-Our model predicts that no wine is in the best rated wine group, but actually 54 of the wines are rated 8 or 9 in the test set. Our prediction is same as the baseline prediction. So, there is not much benefit from this model. Let's check what is the maximum value of prediction over test set.
+Our model predicts that no wine is in the best rated wine group. Our prediction is same as the baseline prediction. So, there is not much benefit from this model. Let's check what is the maximum value of prediction over test set.
 
 ```{r}
 print("The maximum value of prediction over testing set is ")
